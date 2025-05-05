@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PS4 Game Sales Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        .filter-section {
+            margin-bottom: 30px;
+        }
+
+        .game-pie-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .game-list {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .game-item {
+            margin-bottom: 10px;
+        }
+
+        .game-item a {
+            text-decoration: none;
+            color: #0066cc;
+        }
+
+        .game-item a:hover {
+            text-decoration: underline;
+        }
+
+        .chart-container {
+            flex: 2;
+        }
+
+        .pagination {
+            margin-top: 10px;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: #333;
+            padding: 4px 8px;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+        }
+
+        .pagination a.active {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .chart-section {
+            margin-top: 50px;
+        }
+
+        .chart-section p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .genre-box {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>PS4 Game Sales Dashboard</h1>
+
+    <div class="filter-section">
+        <form method="get">
+            <div class="form-group">
+                <label><strong>Year Range:</strong></label>
+                <input type="number" name="year_from" value="{{ year_from }}"> to
+                <input type="number" name="year_to" value="{{ year_to }}">
+            </div>
+
+            <div class="form-group">
+                <label><strong>Genres:</strong></label><br>
+                {% for genre in all_genres %}
+                    <div class="genre-box">
+                        <input type="checkbox" name="genre" value="{{ genre }}" {% if genre in selected_genres %}checked{% endif %}>
+                        {{ genre }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit">Apply Filters</button>
+        </form>
+    </div>
+
+    <h2>Top PS4 Games List</h2>
+    <p>Select a genre and year range to view the top PS4 games. Click a game to see its regional sales breakdown.</p>
+
+    <div class="game-pie-container">
+        <!-- Game List as a Table -->
+        <div class="game-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Game</th>
+                        <th>Year</th>
+                        <th>Genre</th>
+                        <th>Publisher</th>
+                        <th>Global Sales (M)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in games %}
+                    <tr>
+                        <td><a href="{{ g.link }}">{{ g.Game }}</a></td>
+                        <td>{{ g.Year }}</td>
+                        <td>{{ g.Genre }}</td>
+                        <td>{{ g.Publisher }}</td>
+                        <td>{{ g.Global }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                {% for p in range(1, pages + 1) %}
+                    <a href="?{% for genre in selected_genres %}genre={{ genre }}&{% endfor %}year_from={{ year_from }}&year_to={{ year_to }}&page={{ p }}"{% if p == page %} class="active"{% endif %}>{{ p }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="chart-container">
+            <h2>Regional Sales Breakdown</h2>
+            <p>This pie chart shows how sales of the selected game are distributed across regions like North America, Europe, Japan, and the Rest of the World.</p>
+            {{ pie_div|safe }}
+        </div>
+    </div>
+
+    <!-- Genre Sales Chart -->
+    <div class="chart-section">
+        <h2>Top Genres by Global Sales</h2>
+        <p>This bar chart displays the 10 most successful game genres on PS4 based on global sales.</p>
+        {{ genre_div|safe }}
+    </div>
+
+    <!-- Publisher Sales Chart -->
+    <div class="chart-section">
+        <h2>Top Publishers by Global Sales</h2>
+        <p>This chart shows the publishers with the highest total sales across all their PS4 games.</p>
+        {{ pub_div|safe }}
+    </div>
+
+    <!-- Game Releases Per Year -->
+    <div class="chart-section">
+        <h2>Games Released Per Year</h2>
+        <p>This chart shows how many PS4 games were released each year from 2013 to 2017.</p>
+        {{ year_div|safe }}
+    </div>
+
+</body>
+</html>
